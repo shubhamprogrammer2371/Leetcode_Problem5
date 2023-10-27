@@ -1,0 +1,65 @@
+int extend(char *s, int start, int end) {
+    int len = strlen(s);
+    for(; start >= 0 && end < len; start--, end++) {
+        if(*(s + start) != *(s + end))
+            break;
+    }
+    return end - start - 1;
+}
+
+char * longestPalindrome(char * s){
+    int max = 0, idx = 0, len = strlen(s);
+    for(int i = 0; i < len; i++) 
+    {
+        int len1 = extend(s, i, i);       /* For even string */
+        int len2 = extend(s, i, i + 1);   /* For odd string  */
+        if (max < fmax(len1, len2)) 
+        {
+            idx = (len1 > len2) ? (i - len1 / 2) : (i - len2 / 2 + 1);
+            max = fmax(len1, len2);
+        }
+    }
+    char *res = malloc((max+1) *sizeof(char));
+    memcpy(res, &s[idx], max);
+    res[max] = '\0';
+    return res;
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+char * longestPalindrome(char * s){
+    // Dynamic Programming
+    int n = strlen(s), begin = 0, longest = 1; // Default the begin and longest so that we can pick the first element if no palindrom longer than 1 charactor can be found
+    bool dp[n][n]; // dp array
+    memset( dp, 0, n*n*sizeof(bool) ); // setting the array elements as 0
+    for (int i = 0; i < n; i++) // Base case: only one charactor
+        dp[i][i] = 1;
+    for (int length = 2; length <= n; length++) // Sub questions: substring with length of x
+    {
+        for (int start = 0; start < n; start++) // Sub questions: substring with starting index of x
+        {
+            int end = start + length - 1;
+            if (end >= n) // No need to check if end is out of bound
+                break;
+            if (s[start] != s[end]) // Palindrom only exist when start and end are the same
+                dp[start][end] = 0;
+            else
+                dp[start][end] = (length <= 2) ? 1 : dp[start+1][end-1]; // When length is 1 or 2, no need to check if it contains any palindrom substring. Check if one index smaller at the beginning and the end is a palindrom substring
+            if (dp[start][end]) // Check it the current substing is a palindrom
+            {
+                if (length > longest) // Compare the current substring with the longest
+                {
+                    longest = length;
+                    begin = start;
+                }
+            }
+        }
+    }
+    char *result = malloc(n+1); // Get target substring
+    strncpy(result, s+begin, longest);
+    result[longest] = 0; // Set the last index as ending char so that result is a string.
+    return result;
+    
+}
